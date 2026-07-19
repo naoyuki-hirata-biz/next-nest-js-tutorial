@@ -1,0 +1,51 @@
+services:
+  # データベース
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: next-ch_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # バックエンド (Nest.js)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    command: npm run start:dev # 開発中はホットリロードのためにdevモードで起動
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgres://your_user:your_password@postgres:5432/your_database_name
+    depends_on:
+      - postgres
+    restart: always
+
+  # フロントエンド (Next.js)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm run dev # 開発中はホットリロードのためにdevモードで起動
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_BACKEND_URL: http://localhost:3001 # Nest.jsのURLを設定
+    depends_on:
+      - backend
+    restart: always
+
+volumes:
+  postgres_data:
