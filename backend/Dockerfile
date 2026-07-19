@@ -13,11 +13,11 @@ RUN npm install
 # Copy the rest of the application code
 COPY . .
 
-# Build the Next.js application
+# Build the NestJS application
 RUN npm run build
 
 # Expose the port the app runs on
-EXPOSE 3000
+EXPOSE 3001
 
-# Run the application
-CMD ["npm", "run", "start"]
+# Run the application in production mode
+CMD ["npm", "run", "start:prod"]
